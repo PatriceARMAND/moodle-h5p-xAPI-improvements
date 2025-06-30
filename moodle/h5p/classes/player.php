@@ -159,10 +159,14 @@ class player {
     public static function display(string $url, \stdClass $config, bool $preventredirect = true,
             string $component = ''): string {
         global $OUTPUT;
+	global $COURSE;
         $params = [
                 'url' => $url,
                 'preventredirect' => $preventredirect,
                 'component' => $component,
+		'my_course_id' => $COURSE->id,
+		'my_course_shortname' => $COURSE->shortname,
+		'my_course_idnumber' => $COURSE->idnumber,
             ];
 
         $optparams = ['frame', 'export', 'embed', 'copyright'];

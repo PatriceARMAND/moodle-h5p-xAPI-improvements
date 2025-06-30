@@ -28,6 +28,13 @@ require_once(__DIR__ . '/../config.php');
 
 $url = required_param('url', PARAM_LOCALURL);
 
+// get parameters provided by display method of class Player
+$my_course_id = optional_param('my_course_id', 0 , PARAM_INT);
+$my_course_shortname  = optional_param('my_course_shortname', 0 , PARAM_TEXT);
+$my_course_idnumber  = optional_param('my_course_idnumber', 0 , PARAM_TEXT);
+
+
+
 $config = new stdClass();
 $config->frame = optional_param('frame', 0, PARAM_INT);
 $config->export = optional_param('export', 0, PARAM_INT);
@@ -59,8 +66,13 @@ if (empty($messages->error) && empty($messages->exception)) {
     $PAGE->add_body_class('h5p-embed');
     $PAGE->set_pagelayout('embedded');
 
+    // Load TinCanJS library
+    $PAGE->requires->js(new moodle_url('/h5p/js/tincan.js'));
     // Load the embed.js to allow communication with the parent window.
     $PAGE->requires->js(new moodle_url('/h5p/js/embed.js'));
+
+    $args = array(array('my_course_id' => $my_course_id, 'my_course_idnumber' => $my_course_idnumber ));
+    $PAGE->requires->js_init_call('initializeEmbedJs', $args );    
 
     // Add H5P assets to the page.
     $h5pplayer->add_assets_to_page();
@@ -87,6 +99,8 @@ if (empty($messages->error) && empty($messages->exception)) {
     $PAGE->add_body_class('h5p-embed');
     $PAGE->set_pagelayout('embedded');
 
+    // Load TinCanJS library
+    $PAGE->requires->js(new moodle_url('/h5p/js/tincan.js'));
     // Load the embed.js to allow communication with the parent window.
     $PAGE->requires->js(new moodle_url('/h5p/js/embed.js'));
 

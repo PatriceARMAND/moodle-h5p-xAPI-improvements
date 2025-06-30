@@ -1,4 +1,156 @@
-// added code
+/******************** constants and global variables **********/
+class   PatriceArmand_EmbedJsFile_Events{
+	static get VIDEO_PAUSED() {return "VIDEO_PAUSED";}  	// data = currentTime
+	static get VIDEO_PLAY() {return "VIDEO_PLAY";}		// data = currentTime
+	static get VIDEO_PLAY() {return "VIDEO_PLAYING";}	// data = currentTime
+	static get VIDEO_BOOKMARK() {return "VIDEO_BOOKMARK";}	// data = bookmarkName, currentTime 
+	//static get VIDEO_REWIND() {return "VIDEO_REWIND";}	// data = currentTime
+	//static get VIDEO_FORWARD() {return "VIDEO_FORWARD";}	// data = currentTime
+	static get USER_VIEW_PAGE() {return "USER_VIEW_PAGE";}	// data = now()
+	//static get USER_LEAVE_PAGE() {return "USER_LEAVE_PAGE";}// data = now();
+}
+
+
+// global variables
+const patriceArmand_EmbedJsFile_GlobalVariables = {
+	courseId : null,
+	courseIdNumber : null,
+	courseName : null,
+	bookmarks : null,  // array
+	lastPausedTime : null,
+	lastPlayingTime : null,
+	lrs : null
+}
+
+
+/****************** helper functions **************************/
+// code from website https://www.golinuxcloud.com/recursive-search-json-object-javascript/
+function searchJSON(obj, key) {
+  let results = [];
+  for (let k in obj) {
+    if (obj.hasOwnProperty(k)) {
+      if (k === key) {
+        results.push(obj);
+      } else if (typeof obj[k] === "object") {
+        results = results.concat(searchJSON(obj[k], key));
+      }
+    }
+  }
+  return results;
+}
+
+
+function createXapiStatement(patriceArmand_EmbedJsFile_Event, data){
+	// create a basic statement
+	// TODO fill attributes with correct information received as parameters in function initializeEmbedJs()
+	var statement = new TinCan.Statement(	
+    	    {
+        	actor: {account: {name: '5', homePage: 'http://myhomepage'},
+			name: "richochet",
+			objectType: "Agent"
+		},
+        	verb:{display: {"en-US": "myverb"},
+		      id: "http://myID"
+		},
+		object: {id: "http://myverbid",
+			objectType: "Activity"
+		}
+	    }
+	);
+	// modify basic statement
+	switch(patriceArmand_EmbedJsFile_Event){
+		case   PatriceArmand_EmbedJsFile_Events.VIDEO_PAUSED :
+		    var verb = "video_paused";
+		    statement.verb = new TinCan.Verb({display: {"en-US": verb}, id: "http://myID"});
+		    statement.result = new TinCan.Result({extensions: {"https://w3id.org/xapi/video/extensions/time": data.time}});
+		    break;
+		case   PatriceArmand_EmbedJsFile_Events.VIDEO_PLAY :	   
+		    var verb = "video_play";
+		    statement.verb = new TinCan.Verb({display: {"en-US": verb}, id: "http://myID"});
+		    statement.result = new TinCan.Result({extensions: {"https://w3id.org/xapi/video/extensions/time": data.time}});
+		    break;
+		case   PatriceArmand_EmbedJsFile_Events.VIDEO_PLAYING :	   
+		    var verb = "video_playing";
+		    statement.verb = new TinCan.Verb({display: {"en-US": verb}, id: "http://myID"});
+		    statement.result = new TinCan.Result({extensions: {"https://w3id.org/xapi/video/extensions/time": data.time}});
+		    break;
+		case   PatriceArmand_EmbedJsFile_Events.USER_VIEW_PAGE :	   
+		    var verb = "view";
+		    statement.verb = new TinCan.Verb({display: {"en-US": verb}, id: "http://myID"});
+		    break;
+	}	
+	return statement;
+}
+
+function createLRS(){
+	var lrs;
+	try {
+    	     lrs = new TinCan.LRS(
+        	   {
+            	     endpoint: "https://cloud.scorm.com/lrs/5SR72WX0IX/",
+		     username: "pa.armand@gmail.com",
+            	     password: "myPassword",
+            	     allowFail: false
+        	    }
+    	     );
+	}
+	catch (ex) {
+    	    // TODO: do something with error, can't communicate with LRS
+	}
+	return lrs;
+}
+
+function sendXapiStatement(statement){
+	// asynchron version
+	patriceArmand_EmbedJsFile_GlobalVariables.lrs.saveStatement(
+    		statement,
+    		{
+        	    callback: function (err, xhr) {
+        		if (err !== null) {
+		                if (xhr !== null) {
+                		    console.log("Failed to save statement: " + xhr.responseText + " (" + xhr.status + ")");
+                    		// TODO: do something with error, didn't save statement
+                    		return;
+                		}
+
+		                console.log("Failed to save statement: " + err);
+                		// TODO: do something with error, didn't save statement
+                		return;
+            		}
+		            console.log("Statement saved");
+            		// TODO: do something with success (possibly ignore)
+        	    }
+    		}
+	);
+}
+
+patriceArmand_EmbedJsFile_GlobalVariables.lrs = createLRS();
+
+function initializeEmbedJs(Y, arg){
+	patriceArmand_EmbedJsFile_GlobalVariables.courseId = arg["my_course_id"];
+	patriceArmand_EmbedJsFile_GlobalVariables.courseIdNumber = arg["my_course_idnumber"];
+
+	// retrieve informations about bookmarks defined in video included in H5P interactive video activity
+	// all data are in H5PIntegration
+	parent_node_having_property_jsonContent = searchJSON(H5PIntegration, 'jsonContent');
+	str_jsonContent = parent_node_having_property_jsonContent[0].jsonContent;
+	obj_to_be_found = JSON.parse(str_jsonContent);
+	// TODO assign value to patriceArmand_EmbedJsFile_GlobalVariables.bookmarks
+}
+
+// to detect when user opens page
+// fired when page has loaded all content including images, script and css files
+window.addEventListener('load', function() {
+	console.log('window.load- user h opens page ');
+	const data = null ; // usefull information is alaready enabled in the statement via timestamp 
+	let statement = createXapiStatement(  PatriceArmand_EmbedJsFile_Events.USER_VIEW_PAGE, data);
+	console.log('statement created by patrice');
+        console.log(statement);
+	sendXapiStatement(statement);
+});
+
+
+
 
 // This file is part of Moodle - http://moodle.org/
 //
@@ -112,6 +264,46 @@ document.onreadystatechange = function() {
     }
     var H5P = iFrame.contentWindow.H5P;
 
+
+
+
+    // catch events on video object then call function to create a statement then call a function to send statement
+    var iframeH5P = document.getElementsByClassName('h5p-iframe')[0].contentWindow.H5P
+    var iframeVideo = iframeH5P.instances[0].video;
+    iframeVideo.on('stateChange', function (event) { 
+      switch (event.data) {
+        case iframeH5P.Video.SEEKED:
+            // TODO create statement and send it
+            break;    
+        case iframeH5P.Video.SEEKING:
+            // TODO create statement and send it
+            break;        
+        case iframeH5P.Video.ENDED:
+            // TODO create statement and send it
+            break;
+        case iframeH5P.Video.PLAY:
+            // TODO create statement and send it
+            break;
+        case iframeH5P.Video.PAUSED:            
+	    patriceArmand_EmbedJsFile_GlobalVariables.lastPauseTime = iframeVideo.getCurrentTime();
+	    var data = {time : iframeVideo.getCurrentTime()};
+	    var statement = createXapiStatement(PatriceArmand_EmbedJsFile_Events.VIDEO_PAUSED, data);	   
+	    sendXapiStatement(statement);	    
+            break;
+        case iframeH5P.Video.PLAYING:
+	    patriceArmand_EmbedJsFile_GlobalVariables.lastPlayingTime = iframeVideo.getCurrentTime();
+	    var data = {time : iframeVideo.getCurrentTime()};
+	    var statement = createXapiStatement(PatriceArmand_EmbedJsFile_Events.VIDEO_PLAYING, data);
+	    sendXapiStatement(statement);
+            break;
+	case iframeH5P.Video.VOLUMECHANGE:
+            // TODO create statement and send it            
+	    break;
+       }
+   });
+
+
+
     // Check for H5P instances.
     if (!H5P || !H5P.instances || !H5P.instances[0]) {
         return;
@@ -175,6 +367,30 @@ document.onreadystatechange = function() {
 
     // Get emitted xAPI data.
     H5P.externalDispatcher.on('xAPI', function(event) {
+	var statement = new TinCan.Statement(	
+    		{
+        	actor: event.data.statement.actor,
+        	verb: event.data.statement.verb ,
+		object: event.data.statement.object,
+		result: event.data.statement.result,
+        	target: {
+            	    id: "http://rusticisoftware.github.com/TinCanJS"
+        	},				
+		context : {
+		    contextActivities: {			
+			grouping:[
+			  {id: "http://localhost/moodle",
+              		  definition: [Object],
+              		  objectType: "Activity"}
+			]
+		    }
+		}		
+    		}
+	);
+	sendXapiStatement(statement);
+
+
+
         var moodlecomponent = H5P.getMoodleComponent();
         if (moodlecomponent == undefined) {
             return;
