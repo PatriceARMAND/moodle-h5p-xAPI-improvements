@@ -160,6 +160,7 @@ class player {
             string $component = ''): string {
         global $OUTPUT;
 	global $COURSE;
+	global $USER;
         $params = [
                 'url' => $url,
                 'preventredirect' => $preventredirect,
@@ -167,6 +168,9 @@ class player {
 		'my_course_id' => $COURSE->id,
 		'my_course_shortname' => $COURSE->shortname,
 		'my_course_idnumber' => $COURSE->idnumber,
+		'user_id' => $USER->id,
+		'user_email' => $USER->email,
+		'user_username' => $USER->username,
             ];
 
         $optparams = ['frame', 'export', 'embed', 'copyright'];

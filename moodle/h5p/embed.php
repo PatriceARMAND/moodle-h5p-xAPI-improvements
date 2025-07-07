@@ -32,7 +32,9 @@ $url = required_param('url', PARAM_LOCALURL);
 $my_course_id = optional_param('my_course_id', 0 , PARAM_INT);
 $my_course_shortname  = optional_param('my_course_shortname', 0 , PARAM_TEXT);
 $my_course_idnumber  = optional_param('my_course_idnumber', 0 , PARAM_TEXT);
-
+$user_id  = optional_param('user_id', 0 , PARAM_TEXT);
+$user_username  = optional_param('user_username', 0 , PARAM_TEXT);
+$user_email  = optional_param('user_email', 0 , PARAM_TEXT);
 
 
 $config = new stdClass();
@@ -71,7 +73,7 @@ if (empty($messages->error) && empty($messages->exception)) {
     // Load the embed.js to allow communication with the parent window.
     $PAGE->requires->js(new moodle_url('/h5p/js/embed.js'));
 
-    $args = array(array('my_course_id' => $my_course_id, 'my_course_idnumber' => $my_course_idnumber ));
+    $args = array(array('my_course_id' => $my_course_id, 'my_course_idnumber' => $my_course_idnumber, 'my_course_shortname' => $my_course_shortname, 'user_id' => $user_id, 'user_username' => $user_username, 'user_email' => $user_email ));
     $PAGE->requires->js_init_call('initializeEmbedJs', $args );    
 
     // Add H5P assets to the page.

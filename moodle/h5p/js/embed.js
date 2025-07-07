@@ -16,6 +16,10 @@ const patriceArmand_EmbedJsFile_GlobalVariables = {
 	courseId : null,
 	courseIdNumber : null,
 	courseName : null,
+	userId : null,
+	userUsername : null,
+	userEmail : null,
+	h5pContentLibrary : null,
 	bookmarks : null,  // array
 	lastPausedTime : null,
 	lastPlayingTime : null,
@@ -45,14 +49,16 @@ function createXapiStatement(patriceArmand_EmbedJsFile_Event, data){
 	// TODO fill attributes with correct information received as parameters in function initializeEmbedJs()
 	var statement = new TinCan.Statement(	
     	    {
-        	actor: {account: {name: '5', homePage: 'http://myhomepage'},
-			name: "richochet",
-			objectType: "Agent"
+        	actor: {account: {name: patriceArmand_EmbedJsFile_GlobalVariables.userId, homePage: 'http://localhost/moodle'},
+			name: patriceArmand_EmbedJsFile_GlobalVariables.userUsername,
+			objectType: "Agent",
+			mbox : patriceArmand_EmbedJsFile_GlobalVariables.userEmail
 		},
-        	verb:{display: {"en-US": "myverb"},
-		      id: "http://myID"
+        	verb:{display: {"en-US": "myVerb"},
+		      id: "http://myVerbID"
 		},
-		object: {id: "http://myverbid",
+		object: {id: patriceArmand_EmbedJsFile_GlobalVariables.h5pContentLibrary,
+			definition : {type : "http://adlnet.gov/expapi/activities/video"},
 			objectType: "Activity"
 		}
 	    }
@@ -129,6 +135,10 @@ patriceArmand_EmbedJsFile_GlobalVariables.lrs = createLRS();
 function initializeEmbedJs(Y, arg){
 	patriceArmand_EmbedJsFile_GlobalVariables.courseId = arg["my_course_id"];
 	patriceArmand_EmbedJsFile_GlobalVariables.courseIdNumber = arg["my_course_idnumber"];
+	patriceArmand_EmbedJsFile_GlobalVariables.courseShortname = arg["my_course_shortname"];
+	patriceArmand_EmbedJsFile_GlobalVariables.userId = arg["user_id"];
+	patriceArmand_EmbedJsFile_GlobalVariables.userUsername = arg["user_username"];
+	patriceArmand_EmbedJsFile_GlobalVariables.userEmail = arg["user_email"];
 
 	// retrieve informations about bookmarks defined in video included in H5P interactive video activity
 	// all data are in H5PIntegration
@@ -136,6 +146,10 @@ function initializeEmbedJs(Y, arg){
 	str_jsonContent = parent_node_having_property_jsonContent[0].jsonContent;
 	obj_to_be_found = JSON.parse(str_jsonContent);
 	// TODO assign value to patriceArmand_EmbedJsFile_GlobalVariables.bookmarks
+
+	parent_node_having_property_contentUrl = searchJSON(H5PIntegration, 'contentUrl');
+	str_contentUrl = parent_node_having_property_contentUrl[0].contentUrl;
+	patriceArmand_EmbedJsFile_GlobalVariables.h5pContentLibrary = str_contentUrl;
 }
 
 // to detect when user opens page
